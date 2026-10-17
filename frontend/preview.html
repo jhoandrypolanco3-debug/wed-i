@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LaunchPilot AI — Vista previa</title>
+  <style>
+    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background:#f3f4f6; margin:0; padding:20px}
+    .container{max-width:900px;margin:0 auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    header{display:flex;align-items:center;gap:12px}
+    header h1{margin:0;font-size:20px}
+    .row{display:flex;gap:12px;margin-top:12px}
+    .col{flex:1}
+    textarea{width:100%;height:140px;padding:8px;font-family:monospace;font-size:13px}
+    button{background:#0b5fff;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+    pre{background:#0f1724;color:#e6eef8;padding:12px;border-radius:6px;overflow:auto;max-height:360px}
+    .small{font-size:13px;color:#475569}
+    .panel{background:#f8fafc;border:1px solid #e6eef8;padding:12px;border-radius:6px}
+    .status{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600}
+    .ok{background:#e6fffa;color:#065f46}
+    .no{background:#ffe4e6;color:#7f1d1d}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'><rect rx='6' ry='6' width='36' height='36' fill='%230b5fff'/><text x='50%' y='54%' font-size='18' font-family='Arial' fill='white' text-anchor='middle' alignment-baseline='middle'>LP</text></svg>" alt="logo"/>
+      <div>
+        <h1>LaunchPilot AI — Vista previa (MVP)</h1>
+        <div class="small">Interfaz mínima: asistente local, generación de plantillas y explicación heurística.</div>
+      </div>
+    </header>
+
+    <div class="row" style="margin-top:18px">
+      <div class="col">
+        <div class="panel">
+          <strong>Pide al asistente (ejemplos):</strong>
+          <div class="small">FTC: "Crea un TeleOp Java con cuatro motores mecanum y un shooter"</div>
+          <div style="margin-top:8px">
+            <textarea id="prompt" placeholder="Escribe tu instrucción en lenguaje natural..."></textarea>
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+              <select id="lang">
+                <option value="FTC-Java">FTC - Java</option>
+                <option value="FRC-Java">FRC - Java</option>
+                <option value="FRC-C++">FRC - C++</option>
+                <option value="Generic">Genérico</option>
+              </select>
+              <button id="generate">Generar (modo local)</button>
+              <button id="explain">Explicar código (modo local)</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="panel">
+          <strong>Resultado</strong>
+          <pre id="result">Pulsa "Generar" para ver la plantilla local aquí.</pre>
+        </div>
+      </div>
+
+      <div style="width:320px">
+        <div class="panel">
+          <strong>Estado del backend</strong>
+          <div class="small" style="margin-top:8px">Nota: el backend debe arrancarse localmente con <code>npm run start:backend</code>. En esta vista previa no se consulta automáticamente por CORS.</div>
+          <div style="margin-top:8px">
+            <div class="small">Comprueba desde otra terminal:</div>
+            <pre>curl http://localhost:4000/api/health</pre>
+            <div style="margin-top:8px">Si responde correctamente verás: <code>{"ok":true,"env":"mvp/initial-app"}</code></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px">
+          <strong>Información rápida</strong>
+          <ul class="small">
+            <li>Proveedor AI: LocalTemplateProvider (no necesita internet).</li>
+            <li>Analizador FTC: regla demo para hardwareMap.get.</li>
+            <li>Para ver la app real, arranca Vite: <code>npm run start:frontend</code> y abre <code>/</code>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <footer style="margin-top:14px" class="small">Abre <code>frontend/preview.html</code> con Vite o un servidor estático para verlo en el navegador.</footer>
+  </div>
+
+  <script>
+    // Lógica mínima en cliente para simular el LocalTemplateProvider
+    function generateLocal(language, prompt) {
+      if (!prompt || prompt.trim().length === 0) return '// Escribe una instrucción y pulsa Generar'
+      if (language === 'FTC-Java') {
+        return `// TeleOp FTC generado (modo local)\n// Instrucción: ${prompt}\n\nimport com.qualcomm.robotcore.eventloop.opmode.TeleOp;\nimport com.qualcomm.robotcore.hardware.DcMotor;\n\n@TeleOp(name=\"TeleOp ejemplo\")\npublic class TeleOpEjemplo extends com.qualcomm.robotcore.eventloop.opmode.LinearOpMode {\n  private DcMotor frontLeft, frontRight, backLeft, backRight, shooter;\n\n  @Override\n  public void runOpMode() throws InterruptedException {\n    // Inicialización: vincula nombres con hardwareMap\n    frontLeft = hardwareMap.get(DcMotor.class, \"front_left\");\n    frontRight = hardwareMap.get(DcMotor.class, \"front_right\");\n    backLeft = hardwareMap.get(DcMotor.class, \"back_left\");\n    backRight = hardwareMap.get(DcMotor.class, \"back_right\");\n    shooter = hardwareMap.get(DcMotor.class, \"shooter\");\n\n    waitForStart();\n    while (opModeIsActive()) {\n      // TODO: control mecanum y shooter\n      idle();\n    }\n  }\n}`
+      }
+      if (language === 'FRC-Java') {
+        return `// Plantilla FRC Java (modo local)\n// Instrucción: ${prompt}\n\npublic class ElevatorSubsystem extends edu.wpi.first.wpilibj2.command.SubsystemBase {\n  // Añade hardware y métodos aquí\n}`
+      }
+      if (language === 'FRC-C++') {
+        return `// Plantilla FRC C++ (modo local)\n// Instrucción: ${prompt}\n\n// Añade archivos .h y .cpp según WPILib\n`
+      }
+      return `// Generación genérica (modo local)\n// Instrucción: ${prompt}`
+    }
+
+    function explainLocal(content) {
+      const lines = content.split('\n').slice(0,200)
+      return lines.map((l,i)=>`${i+1}: ${l}\n    -> ${simpleExplain(l)}`).join('\n')
+    }
+
+    function simpleExplain(line){
+      if (/hardwareMap/.test(line)) return 'Acceso al hardware map (verifica nombres)'
+      if (/shooter/.test(line)) return 'Línea relacionada con el motor shooter'
+      if (/class /.test(line)) return 'Declaración de clase'
+      if (/import /.test(line)) return 'Import de librería'
+      return 'No se detecta patrón conocido (explicación heurística)'
+    }
+
+    document.getElementById('generate').addEventListener('click',()=>{
+      const lang = document.getElementById('lang').value
+      const prompt = document.getElementById('prompt').value
+      const out = generateLocal(lang, prompt)
+      document.getElementById('result').textContent = out
+    })
+
+    document.getElementById('explain').addEventListener('click',()=>{
+      const content = document.getElementById('result').textContent || ''
+      const out = explainLocal(content)
+      document.getElementById('result').textContent = out
+    })
+  </script>
+</body>
+</html>
